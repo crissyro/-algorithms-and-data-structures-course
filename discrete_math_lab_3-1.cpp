@@ -273,6 +273,7 @@ bool isFull(const matrix_t& m) {
             }
         }
     }
+    
     std::cout << "Отношение является полным\n";
 
     return true;
