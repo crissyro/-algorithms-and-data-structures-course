@@ -427,3 +427,66 @@ public:
    }
 
 };
+
+bool IsRelationA(int x, int y) {
+    return (x % 2 == 0) && (x + y < 10);
+}
+
+bool IsRelationB(int x, int y) {
+    return x + 2 * y < 20;
+}
+
+bool IsRelationC(int x, int y) {
+    return x > 7 || y % 3 == 0;
+}
+
+bool IsRelationT(int x, int y) {
+    return x == 9 && y == 9;
+}
+
+bool equal(int x, int y) {
+    return x == y && x < 1 && y < 1;
+}
+
+bool emty(int x, int y) {
+    return 0;
+}
+
+bool full(int x, int y) {
+    return 1;
+}
+
+bool maxCompositionRelation(int x, int y) {
+    return y - x == 1 ; 
+}
+
+void task2() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(equal, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int compositionCount = 0; // Счетчик операций композиции
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm1Counter(mat, compositionCount, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
