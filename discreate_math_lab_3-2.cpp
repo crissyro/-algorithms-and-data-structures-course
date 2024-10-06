@@ -554,3 +554,108 @@ void task5() {
         std::cerr << e.what() << '\n';
     }
 }
+
+
+void task6() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(maxCompositionRelation, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int compositionCount = 0; // Счетчик операций композиции
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm2Counter(mat, compositionCount, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+void task8() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(emty, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm3Counter(mat, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+void task9() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(full, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm3Counter(mat, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    //task2();
+    //task3();
+    //task5();
+    //task6();
+    task8();
+    task9();
+
+    return 0;
+}
