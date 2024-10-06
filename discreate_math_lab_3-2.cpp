@@ -300,8 +300,8 @@ public:
     bool IsSubsetComprasionCounter(const BinMatrix& S, const BinMatrix& C, int& compCounter) {
         for (int i = 0; i < S.size; i++) {
             for (int j = 0; j < S.size; j++) {
+                compCounter++;
                 if (S.matrix[i][j] & ~C.matrix[i][j]) {
-                    compCounter++;
                     return false;
                 }
             }
@@ -314,8 +314,8 @@ public:
         for (int i = 0; i < A.size; i++) {
             for (int j = 0; j < A.size; j++) {
                 for (int k = 0; k < A.size; k++) {
+                    compCounter++;
                     if (A.matrix[i][k] && B.matrix[k][j]) { 
-                        compCounter++;
                         result.matrix[i][j] = 1;  
                         break;
                     }
@@ -411,12 +411,12 @@ public:
 
        for (int z = 0; z < C.size; z++) {
            for (int x = 0; x < C.size; x++) {
+               comprasionCounter++;
                if (C.matrix[x][z]) {
-                   comprasionCounter++;
                    for (int y = 0; y < C.size; y++) {
+                       comprasionCounter++;
                        if (C.matrix[z][y]) {
                            C.matrix[x][y] = 1;
-                           comprasionCounter++;
                        }
                    }
                }
@@ -555,7 +555,6 @@ void task5() {
     }
 }
 
-
 void task6() {
     try {
         BinMatrix<bool> mat(10);
@@ -650,10 +649,10 @@ void task9() {
 
 int main() {
     setlocale(LC_ALL, "Russian");
-    //task2();
-    //task3();
-    //task5();
-    //task6();
+    task2();
+    task3();
+    task5();
+    task6();
     task8();
     task9();
 
