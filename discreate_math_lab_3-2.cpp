@@ -490,3 +490,67 @@ void task2() {
         std::cerr << e.what() << '\n';
     }
 }
+
+void task3() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(maxCompositionRelation, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int compositionCount = 0; // Счетчик операций композиции
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm1Counter(mat, compositionCount, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
+
+void task5() {
+    try {
+        BinMatrix<bool> mat(10);
+        BinMatrix<bool>::MakeRelationMatrix(equal, mat);
+
+        std::cout << "Входная матрица:" << std::endl;
+        mat.printMatrix();
+
+        int compositionCount = 0; // Счетчик операций композиции
+        int comparisonCount = 0;  // Счетчик операций сравнени
+
+        std::cout << std::endl;
+
+        BinMatrix<bool> res(10);
+
+        res = mat.algorithm2Counter(mat, compositionCount, comparisonCount);
+
+        std::cout << "Результирующая матрица:" << std::endl;
+        res.printMatrix();
+
+        res.isTransitive(res);
+
+        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
+        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
+        std::cout << std::endl;
+
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+}
