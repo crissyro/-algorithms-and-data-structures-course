@@ -133,7 +133,7 @@ public:
             }
         }
 
-        std::cout << "Отношения являются транзитивными" << std::endl;
+        std::cout << "Отношение является транзитивным" << std::endl;
 
         return true;
     }
@@ -161,12 +161,16 @@ public:
     bool isFull(const BinMatrix& m) {
         for (int i = 0; i < m.size; i++) {
             for (int j = 0; j < m.size; j++) {
-                if (!(m.matrix[i][j] || m.matrix[j][i])) {
-                    std::cout << "Отношение не является полным. Отсутствует пара (" << ++i << ", " << ++j << ")\n";
-                    return false;
+                if (i != j) {
+                    if (!m.matrix[i][j] && !m.matrix[j][i]) {
+                        std::cout << "Отношение не является полным. Отсутствует пара (" << ++i << ", " << ++j << ") и пара (" << ++j << ", " << ++i << ") \n";
+                        return false;
+                    }
                 }
+
             }
         }
+
         std::cout << "Отношение является полным\n";
 
         return true;
@@ -207,7 +211,7 @@ public:
         return !IsEqual(m1, m2) && IsSubset(m1, m2);
     }
 
-    BinMatrix UnionMatrix(const BinMatrix& m1, const BinMatrix& m2) {
+    BinMatrix unionMatrix(const BinMatrix& m1, const BinMatrix& m2) {
         BinMatrix res(size);
         for (int i = 0; i < res.size; i++) {
             for (int j = 0; j < res.size; j++) {
@@ -217,7 +221,7 @@ public:
         return res;
     }
 
-    BinMatrix IntersectionMatrix(const BinMatrix& A, const BinMatrix& B) {
+    BinMatrix intersectionMatrix(const BinMatrix& A, const BinMatrix& B) {
         if (A.size != B.size) throw std::invalid_argument("Размеры матриц не совпадают");
 
         BinMatrix result(A.size);
@@ -229,7 +233,7 @@ public:
         return result;
     }
 
-    BinMatrix DiffMatrix(const BinMatrix& m1, const BinMatrix& m2) {
+    BinMatrix diffMatrix(const BinMatrix& m1, const BinMatrix& m2) {
         BinMatrix res(size);
         for (int i = 0; i < res.size; i++) {
             for (int j = 0; j < res.size; j++) {
@@ -239,7 +243,7 @@ public:
         return res;
     }
 
-    BinMatrix SymDiffMatrix(const BinMatrix& m1, const BinMatrix& m2) {
+    BinMatrix symDiffMatrix(const BinMatrix& m1, const BinMatrix& m2) {
         BinMatrix res(size);
         for (int i = 0; i < res.size; i++) {
             for (int j = 0; j < res.size; j++) {
@@ -249,7 +253,7 @@ public:
         return res;
     }
 
-    BinMatrix ComplMatrix(const BinMatrix& m) {
+    BinMatrix complMatrix(const BinMatrix& m) {
         BinMatrix res(size);
         for (int i = 0; i < res.size; i++) {
             for (int j = 0; j < res.size; j++) {
@@ -259,7 +263,7 @@ public:
         return res;
     }
 
-    BinMatrix InverseMatrix(const BinMatrix& m) {
+    BinMatrix inverseMatrix(const BinMatrix& m) {
         BinMatrix res(size);
         for (int i = 0; i < res.size; i++) {
             for (int j = 0; j < res.size; j++) {
@@ -269,21 +273,19 @@ public:
         return res;
     }
 
-    BinMatrix CompositeMatrix(const BinMatrix& A, const BinMatrix& B) {
-        if (A.size != B.size) throw std::invalid_argument("Размеры матриц не совпадают");
-
+    BinMatrix compositeMatrix(const BinMatrix& A, const BinMatrix& B) {
         BinMatrix result(A.size);
         for (int i = 0; i < A.size; i++) {
             for (int j = 0; j < A.size; j++) {
-                result.matrix[i][j] = 0;
                 for (int k = 0; k < A.size; k++) {
-                    if (A.matrix[i][k] && B.matrix[k][j]) {   // A.matrix[i][k] == B.matrix[k][j]
-                        result.matrix[i][j] = 1;   // (A.matrix[i][j] | A.matrix[i][k]) & B.matrix[k][j]
+                    if (A.matrix[i][k] && B.matrix[k][j]) {   
+                        result.matrix[i][j] = 1;   
                         break; 
                     }
                 }
             }
         }
+
         return result;
     }
 
@@ -295,16 +297,45 @@ public:
         }
     }
 
+    bool IsSubsetComprasionCounter(const BinMatrix& S, const BinMatrix& C, int& compCounter) {
+        for (int i = 0; i < S.size; i++) {
+            for (int j = 0; j < S.size; j++) {
+                if (S.matrix[i][j] & ~C.matrix[i][j]) {
+                    compCounter++;
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    BinMatrix compositeMatrixComprasionCounter(const BinMatrix& A, const BinMatrix& B, int& compCounter) {
+        BinMatrix result(A.size);
+        for (int i = 0; i < A.size; i++) {
+            for (int j = 0; j < A.size; j++) {
+                for (int k = 0; k < A.size; k++) {
+                    if (A.matrix[i][k] && B.matrix[k][j]) { 
+                        compCounter++;
+                        result.matrix[i][j] = 1;  
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
     BinMatrix algorithm1(BinMatrix& A) {
         BinMatrix C(A.size);
         copy(A, C);
 
         BinMatrix S(A.size);
-        S = CompositeMatrix(A, A); 
+        S = compositeMatrix(A, A);
 
         while (!IsSubset(S, C)) {
-            C = UnionMatrix(C, S);
-            S = CompositeMatrix(S, C);
+            C = unionMatrix(C, S);
+            S = compositeMatrix(S, C);
         }
 
         return C;
@@ -314,135 +345,85 @@ public:
         BinMatrix C(A.size);
         A.copy(A, C); 
 
-        BinMatrix C2 = CompositeMatrix(C, C);  
+        BinMatrix C2 = compositeMatrix(C, C);  
 
         while (!IsSubset(C2, C)) {
-            C = UnionMatrix(C, C2);     
-            C2 = CompositeMatrix(C2, C2);     
+            C = unionMatrix(C, C2);     
+            C2 = compositeMatrix(C, C);     
         }
 
         return C;
     }
 
-    BinMatrix algorithm1Counter(BinMatrix& A, int& compositionCount, int& comparisonCount) {
+    BinMatrix algorithm1Counter(BinMatrix& A, int& compositionCount, int& compCount) {
         BinMatrix C(A.size);
         copy(A, C);
 
         BinMatrix S(A.size);
-        S = CompositeMatrix(A, A);
+        S = compositeMatrixComprasionCounter(A, A, compCount);
         compositionCount++;
-        while (!IsSubset(S, C)) {
-            comparisonCount += A.size * A.size; // Количество сравнений при проверке подмножества
-            C = UnionMatrix(C, S);
-            S = CompositeMatrix(S, C);
+        while (!IsSubsetComprasionCounter(S, C, compCount)) {
+            C = unionMatrix(C, S);
+            S = compositeMatrixComprasionCounter(S, C, compCount);
             compositionCount++;
         }
 
         return C;
     }
 
-    static BinMatrix algorithm2Counter(BinMatrix& A, int& compositionCount, int& comparisonCount) {
+    BinMatrix algorithm2Counter(BinMatrix& A, int& compositionCount, int& comparisonCount) {
         BinMatrix C(A.size);
         A.copy(A, C);
 
-        BinMatrix C2 = CompositeMatrix(C, C);
+        BinMatrix C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
         compositionCount++;
 
-        while (!IsSubset(C2, C)) {
-            comparisonCount += A.size * A.size; // Количество сравнений при проверке подмножества
-            C = UnionMatrix(C, C2);
-            C2 = CompositeMatrix(C2, C2);
+        while (!IsSubsetComprasionCounter(C2, C, comparisonCount)) {
+            C = unionMatrix(C, C2);
+            C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
             compositionCount++;
         }
 
         return C;
     }
 
-   /* BinMatrix algorithm3(BinMatrix& A) {
-        return void;
-    }*/
+   BinMatrix algorithm3(BinMatrix& A) {
+       BinMatrix C(A.size);
+       A.copy(A, C);
 
-        
+       for (int z = 0; z < C.size; z++) {
+           for (int x = 0; x < C.size; x++) {
+               if (C.matrix[x][z]) {
+                   for (int y = 0; y < C.size; y++) {
+                       if (C.matrix[z][y])
+                           C.matrix[x][y] = 1;
+                   }
+               }
+           }
+       }
+
+       return C;
+   }
+
+   BinMatrix algorithm3Counter(BinMatrix& A, int& comprasionCounter) {
+       BinMatrix C(A.size);
+       A.copy(A, C);
+
+       for (int z = 0; z < C.size; z++) {
+           for (int x = 0; x < C.size; x++) {
+               if (C.matrix[x][z]) {
+                   comprasionCounter++;
+                   for (int y = 0; y < C.size; y++) {
+                       if (C.matrix[z][y]) {
+                           C.matrix[x][y] = 1;
+                           comprasionCounter++;
+                       }
+                   }
+               }
+           }
+       }
+
+       return C;
+   }
+
 };
-
-bool IsRelationA(int x, int y) {
-    return (x % 2 == 0) && (x + y < 10);
-}
-
-bool IsRelationB(int x, int y) {
-    return x + 2 * y < 20;
-}
-
-bool IsRelationC(int x, int y) {
-    return x > 7 || y % 3 == 0;
-}
-
-bool IsRelationT(int x, int y) {
-    return x == 9 && y == 9;
-}
-
-bool equal(int x, int y) {
-    return x == y;
-}
-
-void task2() {
-    try {
-        BinMatrix<bool> mat(10);
-        BinMatrix<bool>::MakeRelationMatrix(equal, mat);
-
-        int compositionCount = 0; // Счетчик операций композиции
-        int comparisonCount = 0;  // Счетчик операций сравнени
-
-        std::cout << std::endl;
-
-        BinMatrix<bool> res(10);
-
-        res = mat.algorithm1Counter(mat, compositionCount, comparisonCount);
-
-        std::cout << "Результирующая матрица:" << std::endl;
-        res.printMatrix();
-
-        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
-        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
-
-
-    }
-    catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-    }
-}
-
-void task3() {
-    try {
-        BinMatrix<bool> mat(10);
-        BinMatrix<bool>::MakeRelationMatrix([](int x, int y) { return x | y; }, mat);
-
-        int compositionCount = 0; // Счетчик операций композиции
-        int comparisonCount = 0;  // Счетчик операций сравнени
-
-        std::cout << std::endl;
-
-        BinMatrix<bool> res(10);
-
-        res = mat.algorithm1Counter(mat, compositionCount, comparisonCount);
-
-        std::cout << "Результирующая матрица:" << std::endl;
-        res.printMatrix();
-
-        std::cout << "Кол-во композиций: " << compositionCount << std::endl;
-        std::cout << "Кол-во сравнений: " << comparisonCount << std::endl;
-
-
-    }
-    catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
-    }
-}
-
-int main() {
-    setlocale(LC_ALL, "Russian");
-    task2();
-    task3();
-
-    return 0;
-}
