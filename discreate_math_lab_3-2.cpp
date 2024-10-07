@@ -335,7 +335,7 @@ public:
 
         while (!IsSubset(S, C)) {
             C = unionMatrix(C, S);
-            S = compositeMatrix(S, C);
+            S = compositeMatrix(S, A);
         }
 
         return C;
@@ -350,38 +350,6 @@ public:
         while (!IsSubset(C2, C)) {
             C = unionMatrix(C, C2);     
             C2 = compositeMatrix(C, C);     
-        }
-
-        return C;
-    }
-
-    BinMatrix algorithm1Counter(BinMatrix& A, int& compositionCount, int& compCount) {
-        BinMatrix C(A.size);
-        copy(A, C);
-
-        BinMatrix S(A.size);
-        S = compositeMatrixComprasionCounter(A, A, compCount);
-        compositionCount++;
-        while (!IsSubsetComprasionCounter(S, C, compCount)) {
-            C = unionMatrix(C, S);
-            S = compositeMatrixComprasionCounter(S, C, compCount);
-            compositionCount++;
-        }
-
-        return C;
-    }
-
-    BinMatrix algorithm2Counter(BinMatrix& A, int& compositionCount, int& comparisonCount) {
-        BinMatrix C(A.size);
-        A.copy(A, C);
-
-        BinMatrix C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
-        compositionCount++;
-
-        while (!IsSubsetComprasionCounter(C2, C, comparisonCount)) {
-            C = unionMatrix(C, C2);
-            C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
-            compositionCount++;
         }
 
         return C;
@@ -404,6 +372,38 @@ public:
 
        return C;
    }
+
+    BinMatrix algorithm1Counter(BinMatrix& A, int& compositionCount, int& compCount) {
+        BinMatrix C(A.size);
+        copy(A, C);
+
+        BinMatrix S(A.size);
+        S = compositeMatrixComprasionCounter(A, A, compCount);
+        compositionCount++;
+        while (!IsSubsetComprasionCounter(S, C, compCount)) {
+            C = unionMatrix(C, S);
+            S = compositeMatrixComprasionCounter(S, A, compCount);
+            compositionCount++;
+        }
+
+        return C;
+    }
+
+    BinMatrix algorithm2Counter(BinMatrix& A, int& compositionCount, int& comparisonCount) {
+        BinMatrix C(A.size);
+        A.copy(A, C);
+
+        BinMatrix C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
+        compositionCount++;
+
+        while (!IsSubsetComprasionCounter(C2, C, comparisonCount)) {
+            C = unionMatrix(C, C2);
+            C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
+            compositionCount++;
+        }
+
+        return C;
+    }
 
    BinMatrix algorithm3Counter(BinMatrix& A, int& comprasionCounter) {
        BinMatrix C(A.size);
