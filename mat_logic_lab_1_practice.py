@@ -23,25 +23,30 @@ class LogicSolver:
         self.window.geometry("500x400")
         self.window.configure(bg="#E8F0FE")
 
+        # Поле для ввода формулы
         self.formula_label = tk.Label(self.window, text="Введите формулу логики:", bg="#E8F0FE", font=("Arial", 12))
         self.formula_label.pack(pady=10)
 
         self.formula_entry = tk.Entry(self.window, width=50, font=("Arial", 12))
         self.formula_entry.pack(pady=10)
 
+        # Кнопка для проверки противоречивости
         self.check_button = tk.Button(self.window, text="Проверить противоречивость", command=self.check_consistency,
                                       bg="#FF6464", fg="white", font=("Arial", 12))
         self.check_button.pack(pady=5)
 
+        # Кнопка для поиска всех истинных интерпретаций
         self.find_button = tk.Button(self.window, text="Найти все истинные интерпретации",
                                      command=self.find_true_interpretations, bg="#4CAF50", fg="white",
                                      font=("Arial", 12))
         self.find_button.pack(pady=5)
 
+        # Кнопка для вывода таблицы истинности
         self.truth_table_button = tk.Button(self.window, text="Вывести таблицу истинности",
                                             command=self.show_truth_table, bg="#FFC107", fg="white", font=("Arial", 12))
         self.truth_table_button.pack(pady=5)
 
+        # Поле для вывода результата
         self.result_text = tk.Text(self.window, height=10, width=50, font=("Arial", 12), bg="#F8F9FA")
         self.result_text.pack(pady=10)
 
@@ -56,7 +61,7 @@ class LogicSolver:
         @param formula Формула в строковом формате.
         @return Обработанная строка формулы.
         """
-        formula = formula.replace(" ", "") 
+        formula = formula.replace(" ", "")  # Убираем пробелы
         formula = re.sub(r"([A-Za-z])([A-Za-z])", r"\1&\2", formula)
         formula = formula.replace("&", "^").replace("!", "¬").replace("|", "v")
         return formula
@@ -71,15 +76,15 @@ class LogicSolver:
         """
         stack = []
         for token in formula:
-            if token in interpretation: 
+            if token in interpretation:
                 stack.append(interpretation[token])
-            elif token == "¬":  
+            elif token == "¬":
                 stack.append(not stack.pop())
-            elif token == "^": 
+            elif token == "^":
                 b = stack.pop()
                 a = stack.pop()
                 stack.append(a and b)
-            elif token == "v":  
+            elif token == "v":
                 b = stack.pop()
                 a = stack.pop()
                 stack.append(a or b)
@@ -92,7 +97,6 @@ class LogicSolver:
         @param formula Логическая формула в строковом формате.
         @return Список токенов формулы.
         """
-
         def precedence(op):
             if op == '¬':
                 return 3
@@ -119,7 +123,7 @@ class LogicSolver:
         values = []
         operators = []
         for token in tokens:
-            if token.isalpha(): 
+            if token.isalpha():
                 values.append(token)
             elif token == '(':
                 operators.append(token)
@@ -127,7 +131,7 @@ class LogicSolver:
                 while operators and operators[-1] != '(':
                     apply_operator(operators, values)
                 operators.pop()
-            else:  
+            else:
                 while (operators and operators[-1] != '(' and
                        precedence(operators[-1]) >= precedence(token)):
                     apply_operator(operators, values)
@@ -144,7 +148,7 @@ class LogicSolver:
         formula = self.preprocess_formula(formula_str)
         parsed_formula = self.parse_formula(formula)
 
-        variables = sorted(self.extract_variables(formula))  
+        variables = sorted(self.extract_variables(formula))  # Переменные в отсортированном порядке
         interpretations = list(product([True, False], repeat=len(variables)))
 
         self.result_text.delete(1.0, tk.END)
@@ -191,7 +195,7 @@ class LogicSolver:
         formula = self.preprocess_formula(formula_str)
         parsed_formula = self.parse_formula(formula)
 
-        variables = self.extract_variables(formula)
+        variables = sorted(self.extract_variables(formula))
         interpretations = product([True, False], repeat=len(variables))
 
         true_interpretations = []
