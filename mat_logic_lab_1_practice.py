@@ -1,218 +1,192 @@
-import tkinter as tk
-from itertools import product
+"""@made by ujent"""
+
 import re
+import itertools
+import tkinter as tk
+from tkinter import scrolledtext
 
-
-class LogicSolver:
-    """
-    @brief Класс для решения задач по логическим формулам в КНФ.
-    Этот класс предоставляет возможности для:
-    - Проверки противоречивости формулы.
-    - Нахождения всех истинных интерпретаций.
-    - Вывода таблицы истинности для формулы.
-
-    Формулы могут включать следующие операторы:
-    - ¬, ! - логическое отрицание
-    - &, ^ - логическое И
-    - |, v - логическое ИЛИ
-    """
-
-    def __init__(self):
-        self.window = tk.Tk()
-        self.window.title("КНФ решатель")
-        self.window.geometry("500x400")
-        self.window.configure(bg="#E8F0FE")
-
-        # Поле для ввода формулы
-        self.formula_label = tk.Label(self.window, text="Введите формулу логики:", bg="#E8F0FE", font=("Arial", 12))
-        self.formula_label.pack(pady=10)
-
-        self.formula_entry = tk.Entry(self.window, width=50, font=("Arial", 12))
-        self.formula_entry.pack(pady=10)
-
-        # Кнопка для проверки противоречивости
-        self.check_button = tk.Button(self.window, text="Проверить противоречивость", command=self.check_consistency,
-                                      bg="#FF6464", fg="white", font=("Arial", 12))
-        self.check_button.pack(pady=5)
-
-        # Кнопка для поиска всех истинных интерпретаций
-        self.find_button = tk.Button(self.window, text="Найти все истинные интерпретации",
-                                     command=self.find_true_interpretations, bg="#4CAF50", fg="white",
-                                     font=("Arial", 12))
-        self.find_button.pack(pady=5)
-
-        # Кнопка для вывода таблицы истинности
-        self.truth_table_button = tk.Button(self.window, text="Вывести таблицу истинности",
-                                            command=self.show_truth_table, bg="#FFC107", fg="white", font=("Arial", 12))
-        self.truth_table_button.pack(pady=5)
-
-        # Поле для вывода результата
-        self.result_text = tk.Text(self.window, height=10, width=50, font=("Arial", 12), bg="#F8F9FA")
-        self.result_text.pack(pady=10)
-
-        self.window.mainloop()
-
-    def preprocess_formula(self, formula):
+class TruthTableApp:
+    def __init__(self, root):
         """
-        Преобразование формулы:
-        1. Добавляем конъюнкцию, если нет операций между операндами.
-        2. Заменяем символы &, !, | на ^, ¬ и v соответственно.
-
-        @param formula Формула в строковом формате.
-        @return Обработанная строка формулы.
+        Инициализация интерфейса приложения и основных элементов.
         """
-        formula = formula.replace(" ", "")  # Убираем пробелы
-        formula = re.sub(r"([A-Za-z])([A-Za-z])", r"\1&\2", formula)
-        formula = formula.replace("&", "^").replace("!", "¬").replace("|", "v")
-        return formula
+        self.root = root
+        self.root.title("Решатель КНФ")
 
-    def evaluate_formula(self, formula, interpretation):
+        # Поле ввода для формулы
+        label_formula = tk.Label(root, text="Введите формулу:")
+        label_formula.pack(pady=5)
+
+        self.entry_formula = tk.Entry(root, width=50)
+        self.entry_formula.pack(pady=5)
+
+        # Режим отображения (все строки, только истинные, только ложные)
+        self.mode_var = tk.IntVar(value=2)
+
+        frame_mode = tk.Frame(root)
+        frame_mode.pack(pady=5)
+
+        label_mode = tk.Label(frame_mode, text="Выберите задачу:")
+        label_mode.pack(side=tk.LEFT)
+
+        radio_all = tk.Radiobutton(frame_mode, text="Таблица истинности", variable=self.mode_var, value=2)
+        radio_all.pack(side=tk.LEFT)
+
+        radio_true = tk.Radiobutton(frame_mode, text="Только истинные интерпретации", variable=self.mode_var, value=1)
+        radio_true.pack(side=tk.LEFT)
+
+        radio_false = tk.Radiobutton(frame_mode, text="Проверка на противоречивость", variable=self.mode_var, value=0)
+        radio_false.pack(side=tk.LEFT)
+
+        # Кнопка для расчета таблицы истинности
+        button_calculate = tk.Button(root, text="Вывести результат", command=self.show_truth_table)
+        button_calculate.pack(pady=10)
+
+        # Поле вывода таблицы истинности (с возможностью прокрутки)
+        self.output_text = scrolledtext.ScrolledText(root, width=60, height=20)
+        self.output_text.pack(pady=10)
+
+    def formating_string(self, string):
         """
-        Оценка истинности формулы на основе интерпретации.
+        Форматирует входную строку, добавляя операторы и заменяя символы.
 
-        @param formula Строка с логической формулой.
-        @param interpretation Словарь с интерпретацией переменных.
-        @return Булево значение результата формулы.
+        @param string: Входная строка с логической формулой.
+        @return: Отформатированная строка.
+        """
+        string = re.sub(r"([A-Za-z])([A-Za-z])", r"\1&\2", string)
+        string = string.upper().replace(" ", "")
+        return string.replace("!", "¬").replace("|", "v")
+
+    def precedence(self, op):
+        """
+        Возвращает приоритет оператора.
+
+        @param op: Символ оператора.
+        @return: Приоритет оператора.
+        """
+        if op == '|':
+            return 1
+        if op == '&':
+            return 2
+        if op == '!':
+            return 3
+        return 0
+
+    def infix_to_postfix(self, expression):
+        """
+        Преобразует инфиксное выражение в постфиксное.
+
+        @param expression: Инфикcное выражение.
+        @return: Постфиксное выражение в виде списка токенов.
         """
         stack = []
-        for token in formula:
-            if token in interpretation:
-                stack.append(interpretation[token])
-            elif token == "¬":
-                stack.append(not stack.pop())
-            elif token == "^":
-                b = stack.pop()
-                a = stack.pop()
-                stack.append(a and b)
-            elif token == "v":
-                b = stack.pop()
-                a = stack.pop()
-                stack.append(a or b)
-        return stack[0]
+        output = []
 
-    def parse_formula(self, formula):
-        """
-        Парсер для преобразования строки формулы в список токенов с поддержкой приоритетов операций.
-
-        @param formula Логическая формула в строковом формате.
-        @return Список токенов формулы.
-        """
-        def precedence(op):
-            if op == '¬':
-                return 3
-            if op == '^':
-                return 2
-            if op == 'v':
-                return 1
-            return 0
-
-        def apply_operator(operators, values):
-            operator = operators.pop()
-            if operator == '¬':
-                val = values.pop()
-                values.append(not val)
+        for char in expression:
+            if char.isalnum():
+                output.append(char)
+            elif char == '(':
+                stack.append(char)
+            elif char == ')':
+                while stack and stack[-1] != '(':
+                    output.append(stack.pop())
+                stack.pop()
             else:
-                right = values.pop()
-                left = values.pop()
-                if operator == '^':
-                    values.append(left and right)
-                elif operator == 'v':
-                    values.append(left or right)
+                while stack and self.precedence(stack[-1]) >= self.precedence(char):
+                    output.append(stack.pop())
+                stack.append(char)
+        while stack:
+            output.append(stack.pop())
 
-        tokens = re.findall(r'[A-Za-z]|\^|v|¬|\(|\)', formula)
-        values = []
-        operators = []
-        for token in tokens:
-            if token.isalpha():
-                values.append(token)
-            elif token == '(':
-                operators.append(token)
-            elif token == ')':
-                while operators and operators[-1] != '(':
-                    apply_operator(operators, values)
-                operators.pop()
+        return output
+
+    def calculate_postfix(self, expression, variable_values):
+        """
+        Вычисляет значение постфиксного выражения.
+
+        @param expression: Постфиксное выражение.
+        @param variable_values: Словарь значений переменных.
+        @return: Значение выражения (True или False).
+        """
+        stack = []
+
+        for token in expression:
+            if token == '!':
+                operand = stack.pop()
+                stack.append(not operand)
+            elif token == '&':
+                operand2 = stack.pop()
+                operand1 = stack.pop()
+                stack.append(operand1 and operand2)
+            elif token == '|':
+                operand2 = stack.pop()
+                operand1 = stack.pop()
+                stack.append(operand1 or operand2)
             else:
-                while (operators and operators[-1] != '(' and
-                       precedence(operators[-1]) >= precedence(token)):
-                    apply_operator(operators, values)
-                operators.append(token)
+                if token in variable_values:
+                    stack.append(variable_values[token])
+                else:
+                    stack.append(bool(int(token)))
 
-        while operators:
-            apply_operator(operators, values)
+        return stack.pop()
 
-        return values
+    def truth_table(self, expression, fstring, mode=2):
+        """
+        Генерирует таблицу истинности для логической формулы.
+
+        @param expression: Постфиксное выражение.
+        @param fstring: Исходная формула для отображения.
+        @param mode: Режим отображения (0 - противоречивость, 1 - только истинные, 2 - все строки).
+        @return: Строка с таблицей истинности или сообщение о противоречивости.
+        """
+        variables = sorted({token for token in expression if token.isalpha()})
+        combinations = list(itertools.product([False, True], repeat=len(variables)))
+
+        result_table = []
+        contradictory = True  # Флаг для проверки противоречивости
+
+        header = ' | '.join(variables) + ' | ' + fstring
+        result_table.append(header)
+        result_table.append('-' * (len(variables) * 4 + 10))
+
+        for combination in combinations:
+            variable_values = dict(zip(variables, combination))
+            result = self.calculate_postfix(expression, variable_values)
+
+            if mode == 0:
+                if result:
+                    contradictory = False
+            elif mode == result or mode == 2:
+                row = ' | '.join(str(int(variable_values[var])) for var in variables)
+                result_table.append(f'{row} | {int(result)}')
+
+        if mode == 0:
+            return "Формула является противоречивой." if contradictory else "Формула не является противоречивой."
+
+        return '\n'.join(result_table)
 
     def show_truth_table(self):
-        """Формирует и выводит таблицу истинности для формулы."""
-        formula_str = self.formula_entry.get()
-        formula = self.preprocess_formula(formula_str)
-        parsed_formula = self.parse_formula(formula)
+        """
+        Обрабатывает ввод пользователя и отображает таблицу истинности.
+        """
+        formula = self.entry_formula.get()
+        mode = self.mode_var.get()
 
-        variables = sorted(self.extract_variables(formula))  # Переменные в отсортированном порядке
-        interpretations = list(product([True, False], repeat=len(variables)))
+        if not formula:
+            self.output_text.insert(tk.END, "Введите формулу!\n")
+            return
 
-        self.result_text.delete(1.0, tk.END)
-        self.result_text.insert(tk.END, "Таблица истинности:\n")
-        headers = "  ".join(variables) + " | Результат\n"
-        self.result_text.insert(tk.END, headers)
-
-        for values in interpretations:
-            interpretation = dict(zip(variables, values))
-            result = self.is_formula_true(parsed_formula, interpretation)
-            row = "  ".join(["T" if v else "F" for v in values]) + " | " + ("T" if result else "F") + "\n"
-            self.result_text.insert(tk.END, row)
-
-    def is_formula_true(self, formula, interpretation):
-        """Проверка, истинна ли формула при заданной интерпретации."""
-        return self.evaluate_formula(formula, interpretation)
-
-    def extract_variables(self, formula):
-        """Извлечение всех переменных из формулы."""
-        return {token for token in re.findall(r'[A-Za-z]', formula)}
-
-    def check_consistency(self):
-        """Проверка противоречивости формулы."""
-        formula_str = self.formula_entry.get()
-        formula = self.preprocess_formula(formula_str)
-        parsed_formula = self.parse_formula(formula)
-
-        variables = self.extract_variables(formula)
-        interpretations = product([True, False], repeat=len(variables))
-
-        for values in interpretations:
-            interpretation = dict(zip(variables, values))
-            if self.is_formula_true(parsed_formula, interpretation):
-                self.result_text.delete(1.0, tk.END)
-                self.result_text.insert(tk.END, "Формула выполнима. Нет противоречия.\n")
-                return
-
-        self.result_text.delete(1.0, tk.END)
-        self.result_text.insert(tk.END, "Формула противоречива (невыполнима).\n")
-
-    def find_true_interpretations(self):
-        """Найти все интерпретации, при которых формула истинна."""
-        formula_str = self.formula_entry.get()
-        formula = self.preprocess_formula(formula_str)
-        parsed_formula = self.parse_formula(formula)
-
-        variables = sorted(self.extract_variables(formula))
-        interpretations = product([True, False], repeat=len(variables))
-
-        true_interpretations = []
-        for values in interpretations:
-            interpretation = dict(zip(variables, values))
-            if self.is_formula_true(parsed_formula, interpretation):
-                true_interpretations.append(interpretation)
-
-        if true_interpretations:
-            self.result_text.delete(1.0, tk.END)
-            self.result_text.insert(tk.END, "Истинные интерпретации:\n")
-            for interp in true_interpretations:
-                self.result_text.insert(tk.END, str(interp) + "\n")
-        else:
-            self.result_text.delete(1.0, tk.END)
-            self.result_text.insert(tk.END, "Нет истинных интерпретаций.\n")
+        try:
+            postfix_expr = self.infix_to_postfix(formula)
+            table = self.truth_table(postfix_expr, formula, mode)
+            self.output_text.delete(1.0, tk.END)
+            self.output_text.insert(tk.END, table)
+        except Exception as e:
+            self.output_text.insert(tk.END, f"Ошибка: {e}\n")
 
 
+# Запуск приложения
 if __name__ == "__main__":
-    app = LogicSolver()
+    root = tk.Tk()
+    app = TruthTableApp(root)
+    root.mainloop()
