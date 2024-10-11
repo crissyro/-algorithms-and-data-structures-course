@@ -219,9 +219,13 @@ void TestWriteToStr() {
     string_t str;
     InitStr(&str, 10);
     WriteToStr(&str, "Hello");
+    
     assert(strcmp(str.data, "Hello") == 0);
+    
     assert(str.length == 5);
+    
     printf("TestWriteToStr passed!\n");
+    
     DoneStr(&str);
 }
 
@@ -229,27 +233,38 @@ void TestDelete() {
     string_t str;
     InitStr(&str, 20);
     WriteToStr(&str, "Hello World");
+    
     Delete(&str, 5, 1);
+    
     assert(strcmp(str.data, "HelloWorld") == 0);
+    
     printf("TestDelete passed!\n");
+    
     DoneStr(&str);
 }
 
 void TestInsert() {
     string_t str, sub;
+    
     InitStr(&str, 20);
     InitStr(&sub, 10);
+    
     WriteToStr(&str, "Helo World");
     WriteToStr(&sub, "l");
+    
     Insert(&sub, &str, 3);
+    
     assert(strcmp(str.data, "Hello World") == 0);
+    
     printf("TestInsert passed!\n");
+    
     DoneStr(&str);
     DoneStr(&sub);
 }
 
 void TestConcat() {
     string_t str1, str2, result;
+    
     InitStr(&str1, 10);
     InitStr(&str2, 10);
     InitStr(&result, 20);
@@ -258,7 +273,9 @@ void TestConcat() {
     WriteToStr(&str2, "World");
 
     Concat(&str1, &str2, &result);
+    
     assert(strcmp(result.data, "HelloWorld") == 0);
+    
     printf("TestConcat passed!\n");
 
     DoneStr(&str1);
@@ -268,11 +285,14 @@ void TestConcat() {
 
 void TestWordCmp() {
     assert(WordCmp("Hello   world", "Hello world"));
+    
     assert(!WordCmp("Hello   world", "Hello  world!"));
+    
     printf("TestWordCmp passed!\n");
 }
 
 int main() {
+    
     TestInitStr();
     TestWriteToStr();
     TestDelete();
