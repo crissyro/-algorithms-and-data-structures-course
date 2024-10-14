@@ -306,6 +306,7 @@ public:
                 }
             }
         }
+
         return true;
     }
 
@@ -381,6 +382,7 @@ public:
         S = compositeMatrixComprasionCounter(A, A, compCount);
         compositionCount++;
         while (!IsSubsetComprasionCounter(S, C, compCount)) {
+            compCount++; // учитываем сравнение в цикле
             C = unionMatrix(C, S);
             S = compositeMatrixComprasionCounter(S, A, compCount);
             compositionCount++;
@@ -397,6 +399,7 @@ public:
         compositionCount++;
 
         while (!IsSubsetComprasionCounter(C2, C, comparisonCount)) {
+            comparisonCount++; // учитываем сравнение в цикле
             C = unionMatrix(C, C2);
             C2 = compositeMatrixComprasionCounter(C, C, comparisonCount);
             compositionCount++;
@@ -410,6 +413,7 @@ public:
        A.copy(A, C);
 
        for (int z = 0; z < C.size; z++) {
+           comprasionCounter++;
            for (int x = 0; x < C.size; x++) {
                comprasionCounter++;
                if (C.matrix[x][z]) {
@@ -428,22 +432,6 @@ public:
 
 };
 
-bool IsRelationA(int x, int y) {
-    return (x % 2 == 0) && (x + y < 10);
-}
-
-bool IsRelationB(int x, int y) {
-    return x + 2 * y < 20;
-}
-
-bool IsRelationC(int x, int y) {
-    return x > 7 || y % 3 == 0;
-}
-
-bool IsRelationT(int x, int y) {
-    return x == 9 && y == 9;
-}
-
 bool equal(int x, int y) {
     return x == y && x < 1 && y < 1;
 }
@@ -457,7 +445,7 @@ bool full(int x, int y) {
 }
 
 bool maxCompositionRelation(int x, int y) {
-    return y - x == 1 ; 
+    return y - x == 1 || (x == 9 && y == 0); 
 }
 
 void task2() {
@@ -649,6 +637,7 @@ void task9() {
 
 int main() {
     setlocale(LC_ALL, "Russian");
+
     task2();
     task3();
     task5();
