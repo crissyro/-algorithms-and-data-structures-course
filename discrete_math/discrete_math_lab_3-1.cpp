@@ -2,7 +2,7 @@
 #include <vector>
 #include <cmath>
 
-constexpr int N = 11;
+constexpr int N = 10;
 using matrix_t = std::vector<std::vector<int>>;
 
 // Функция для инициализации матрицы нулями
