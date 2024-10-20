@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 template <typename T>
 class BinMatrix {
@@ -188,24 +189,30 @@ public:
 
 };
 
-void factorSet(const int* a) {
-    std::cout << "{ ";
+void factorSet(const int* S, const size_t size) {
+    int count_classes = *std::max_element(S, S + size);
 
-    for (size_t i = 0; i < 10; ++i) {
-        if (i == 0 || a[i] != a[i - 1]) {
-            std::cout << "{ ";
-            std::cout << (i + 1);
-        }
-        else {
-            std::cout << ", " << (i + 1);
-        }
+    std::cout << "{";
+    for (int i = 1; i <= count_classes; ++i) {
+        if (i != 1) std::cout << ", ";
 
-        if (i == 10 - 1 || a[i] != a[i + 1]) {
-            std::cout << " }, ";
+        std::cout << "{";
+
+        bool isFirst = true;
+        for (int j = 0; j < size; ++j) {
+            if (S[j] == i) {
+                if (!isFirst) std::cout << ",";
+
+                else isFirst = false;
+                
+                std::cout << j + 1;
+            }
         }
+        
+        std::cout << "}";
     }
 
-    std::cout << " }" << std::endl;
+    std::cout << "}" << std::endl;
 }
 
 const int baseArray[10] = { 1, 2, 3, 4, 5, 6 , 7, 8, 9, 10 };
@@ -261,8 +268,6 @@ void task2() {
     }
 }
 
-
-
 void task4() {
     try {
         BinMatrix<bool> mat(10);
@@ -290,7 +295,7 @@ void task4() {
 
         std::cout << "Фактормножество" << std::endl;
 
-        factorSet(res);
+        factorSet(res, 10);
 
     }
     catch (const std::exception& e) {
@@ -304,4 +309,3 @@ int main() {
 
     return 0;
 }
-
