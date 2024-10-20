@@ -169,7 +169,7 @@ public:
         }
     }
 
-    void formationOfPartition(const BinMatrix& m, const int* array, int* resArray) {
+    void factorSet(const BinMatrix& m, const int* array, int* resArray) {
         int k = 0;
 
         for (size_t i = 0; i < 10; i++)
@@ -279,7 +279,7 @@ void task4() {
 
         int res[10];
 
-        mat.formationOfPartition(mat, baseArray, res);
+        mat.factorSet(mat, baseArray, res);
 
         std::cout << "Храние разбиения в одномерном массиве" << std::endl;
 
@@ -288,7 +288,7 @@ void task4() {
 
         std::cout << std::endl;
 
-        std::cout << "Классы эквивалентности" << std::endl;
+        std::cout << "Фактормножество" << std::endl;
 
         printClasses(res);
 
