@@ -5,7 +5,6 @@
 
 template <typename T>
 class BinMatrix {
-
 public:
     unsigned short size;
     std::vector<std::vector<T>> matrix;
@@ -20,6 +19,10 @@ public:
     }
 
     ~BinMatrix() {};
+
+    short getSize(BinMatrix& M) {
+        return M.size;
+    }
 
     template <typename RelationFunction>
     static void MakeRelationMatrix(RelationFunction relation, BinMatrix& result) {
@@ -374,7 +377,7 @@ inline bool isNegative(const std::vector<int> W) {
 }
 
 template<typename T>
-static void topologicSort(BinMatrix<T>& m) {
+static void topologicSort(BinMatrix<T>& m, Point* p) {
     std::vector<int> W;
 
     for (size_t i = 0; i < m.size; i++) {
@@ -389,7 +392,7 @@ static void topologicSort(BinMatrix<T>& m) {
 
         for (int i = 0; i < m.size; i++) {
             if (W[i] == 0) {
-                printf("%i ", i + 1);
+                printf("(%i, %i) ", p[i].x, p[i].y);
                 W[i] = -(k + 1);
             }
         }
@@ -421,7 +424,7 @@ void task3() {
         std::cout << "Топологическая сортировка по матрице на множестве М1 отношения доминирования:" << std::endl;
         BinMatrix<bool> domM1 = mat1.makeDominationMatrix(mat1);
 
-        topologicSort(domM1);
+        topologicSort(domM1, M1);
 
         std::cout << std::endl;
         std::cout << std::endl;
@@ -436,7 +439,7 @@ void task3() {
         std::cout << "Топологическая сортировка по матрице на множестве М2 отношения доминирования:" << std::endl;
         BinMatrix<bool> domM2 = mat2.makeDominationMatrix(mat2);
 
-        topologicSort(domM2);
+        topologicSort(domM2, M2);
 
         std::cout << std::endl;
 
