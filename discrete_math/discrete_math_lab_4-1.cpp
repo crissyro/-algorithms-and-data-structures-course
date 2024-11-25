@@ -170,19 +170,14 @@ void graphGetRoutes(const BinMatrix<int>& graf, int vertex, int n) {
     //std::cout << "\nВсего маршрутов длины " << n << " из вершины " << vertex << ": " << routeCount << "\n";
 }
 
-void graphGetAdjacentVertices(int graf[MAX_VERTICES][MAX_VERTICES], int vertex,
-    int vertices[], int* count) {
+void graphGetAdjacentVertices(int graf[MAX_VERTICES][MAX_VERTICES], int vertex, int vertices[], int* count) {
     *count = 0;
     for (int i = 0; i < MAX_VERTICES; ++i) 
         if (graf[vertex - 1][i]) vertices[(*count)++] = i + 1;
     
 }
 
-void graphGetRoutesAmount(int currentVertex, int routeLength,
-    int currentRoute[MAX_VERTICES],
-    int routeCount[MAX_VERTICES],
-    int graf[MAX_VERTICES][MAX_VERTICES],
-    int graphSize) {
+void graphGetRoutesAmount(int currentVertex, int routeLength, int currentRoute[MAX_VERTICES], int routeCount[MAX_VERTICES], int graf[MAX_VERTICES][MAX_VERTICES], int graphSize) {
     int adjacentVertices[MAX_VERTICES];
     int adjacentCount;
     graphGetAdjacentVertices(graf, currentRoute[currentVertex], adjacentVertices, &adjacentCount);
@@ -199,8 +194,7 @@ void graphGetRoutesAmount(int currentVertex, int routeLength,
     }
 }
 
-void graphGetRoutesAmountWrapper(int graf[MAX_VERTICES][MAX_VERTICES],
-    int graphSize, int routeLength) {
+void graphGetRoutesAmountWrapper(int graf[MAX_VERTICES][MAX_VERTICES], int graphSize, int routeLength) {
     int routeCount[MAX_VERTICES];
     int currentRoute[MAX_VERTICES];
 
@@ -222,11 +216,7 @@ void graphGetRoutesAmountWrapper(int graf[MAX_VERTICES][MAX_VERTICES],
 }
 
 // Функция для поиска маршрутов между двумя вершинами графа
-void graphGetRoutesBetweenVertices(int l, int vertexEnd, int currRoute[],
-    int* currRouteSize,
-    int routes[MAX_VERTICES][MAX_VERTICES],
-    int* routesCount,
-    int graf[MAX_VERTICES][MAX_VERTICES]) {
+void graphGetRoutesBetweenVertices(int l, int vertexEnd, int currRoute[], int* currRouteSize, int routes[MAX_VERTICES][MAX_VERTICES], int* routesCount, int graf[MAX_VERTICES][MAX_VERTICES]) {
     int adjacentVertices[MAX_VERTICES];
     int adjacentCount;
 
