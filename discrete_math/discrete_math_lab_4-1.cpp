@@ -2,7 +2,8 @@
 #include <vector>
 #include <stdexcept>
 #include <unordered_set>
-#include <cstring> 
+#include <cstring>
+#include <chrono>
 
 #define MAX_VERTICES 7
 
@@ -68,7 +69,7 @@ public:
 
 // Проверка: Является ли последовательность маршрутом
 bool graphIsRoute(const std::vector<int>& pos, const BinMatrix<int>& graf) {
-    for (size_t i = 1; i < pos.size(); ++i) 
+    for (size_t i = 1; i < pos.size(); ++i)
         if (!graf[pos[i - 1] - 1][pos[i] - 1]) return false;
 
     return true;
@@ -77,7 +78,7 @@ bool graphIsRoute(const std::vector<int>& pos, const BinMatrix<int>& graf) {
 // Проверка: Является ли последовательность цепью
 bool graphIsChain(const std::vector<int>& pos, const BinMatrix<int>& graf) {
     if (!graphIsRoute(pos, graf)) return false;
-    
+
     BinMatrix<int> tempGraf(graf.getRows(), graf.getCols());
 
     for (size_t i = 0; i < pos.size() - 1; ++i) {
@@ -85,7 +86,7 @@ bool graphIsChain(const std::vector<int>& pos, const BinMatrix<int>& graf) {
         int v = pos[i + 1] - 1;
 
         if (tempGraf[u][v] || tempGraf[v][u]) return false;
-        
+
         else {
             tempGraf[u][v] = 1;
             tempGraf[v][u] = 1;
@@ -96,12 +97,13 @@ bool graphIsChain(const std::vector<int>& pos, const BinMatrix<int>& graf) {
 }
 
 // Проверка: Является ли последовательность простой цепью
-// bool graphIsSimpleChain(const std::vector<int>& pos, const BinMatrix<int>& graf) {
+// 
+//bool graphIsSimpleChain(const std::vector<int>& pos, const BinMatrix<int>& graf) {
 //     if (!graphIsChain(pos, graf)) return false;
-    
+//
 //     for (size_t i = 0; i < pos.size() - 1; ++i) 
 //         for (size_t j = i + 1; j < pos.size(); ++j) if (pos[i] == pos[j]) return false;
-    
+//
 //     return true;
 // }
 
@@ -112,36 +114,36 @@ bool graphIsSimpleChain(const std::vector<int>& pos, const BinMatrix<int>& graf)
     // Проверяем уникальность вершин
     std::unordered_set<int> visited;
     for (int vertex : pos) {
-        if (!visited.insert(vertex).second) {
+        if (!visited.insert(vertex).second) 
             return false; // Если вершина уже была посещена
-        }
     }
-    return true; // Граф является простой цепью
+
+    return true; 
 }
 
 
 // Проверка: Является ли последовательность циклом
 bool graphIsCycle(const std::vector<int>& pos, const BinMatrix<int>& graf) {
     if (!graphIsChain(pos, graf)) return false;
-    
+
     return pos.front() == pos.back();
 }
 
 // Проверка: Является ли последовательность простым циклом
 bool graphIsSimpleCycle(const std::vector<int>& pos, const BinMatrix<int>& graf) {
     if (!graphIsCycle(pos, graf)) return false;
-    
-    for (size_t i = 1; i < pos.size() - 1; ++i) 
+
+    for (size_t i = 1; i < pos.size() - 1; ++i)
         for (size_t j = i + 1; j < pos.size() - 1; ++j) if (pos[i] == pos[j]) return false;
-    
+
     return true;
 }
 
 // Функция для получения смежных вершин
 void graphGetAdjacentVertices(const BinMatrix<int>& graf, int vertex, std::vector<int>& vertices) {
     vertices.clear();
-    for (int i = 0; i < graf.getCols(); ++i) 
-        if (graf[vertex - 1][i]) vertices.push_back(i + 1); 
+    for (int i = 0; i < graf.getCols(); ++i)
+        if (graf[vertex - 1][i]) vertices.push_back(i + 1);
 }
 
 // Рекурсивная функция для поиска маршрутов заданной длины
@@ -150,9 +152,9 @@ void graphGetRoutes_(int l, std::vector<int>& currRoute, int currRouteLength, st
     if (currRouteLength == l) {
         routeCount++;
         std::cout << "{ ";
-        for (int v : currRoute) 
+        for (int v : currRoute)
             std::cout << v << " ";
-        
+
         std::cout << "} \n";
         return;
     }
@@ -189,9 +191,9 @@ void graphGetRoutes(const BinMatrix<int>& graf, int vertex, int n) {
 
 void graphGetAdjacentVertices(int graf[MAX_VERTICES][MAX_VERTICES], int vertex, int vertices[], int* count) {
     *count = 0;
-    for (int i = 0; i < MAX_VERTICES; ++i) 
+    for (int i = 0; i < MAX_VERTICES; ++i)
         if (graf[vertex - 1][i]) vertices[(*count)++] = i + 1;
-    
+
 }
 
 void graphGetRoutesAmount(int currentVertex, int routeLength, int currentRoute[MAX_VERTICES], int routeCount[MAX_VERTICES], int graf[MAX_VERTICES][MAX_VERTICES], int graphSize) {
@@ -202,12 +204,12 @@ void graphGetRoutesAmount(int currentVertex, int routeLength, int currentRoute[M
     for (int i = 0; i < adjacentCount; ++i) {
         currentRoute[currentVertex + 1] = adjacentVertices[i];
 
-        if (currentVertex + 2 == routeLength + 1) 
+        if (currentVertex + 2 == routeLength + 1)
             routeCount[currentRoute[currentVertex + 1] - 1]++;
-        
-        else 
+
+        else
             graphGetRoutesAmount(currentVertex + 1, routeLength, currentRoute, routeCount, graf, graphSize);
-        
+
     }
 }
 
@@ -219,12 +221,12 @@ void graphGetRoutesAmountWrapper(int graf[MAX_VERTICES][MAX_VERTICES], int graph
         currentRoute[0] = i + 1;
 
         for (int j = 0; j < graphSize; ++j) routeCount[j] = 0;
-        
+
         graphGetRoutesAmount(0, routeLength, currentRoute, routeCount, graf, graphSize);
 
-        for (int j = 0; j < graphSize; ++j) 
+        for (int j = 0; j < graphSize; ++j)
             std::cout << routeCount[j] << " ";
-        
+
         std::cout << "\n";
     }
     std::cout << "\n";
@@ -261,10 +263,10 @@ void graphGetRoutesBetweenVertices(int l, int vertexEnd, int currRoute[], int* c
 
 
 // Функция для поиска всех простых максимальных цепей в графе
-// void printAllSimplyChainMaximum(int graf[MAX_VERTICES][MAX_VERTICES], int vertex,
-//     int sizeRoute, int size, int* route, int* minSize) {
+//void printAllSimplyChainMaximum(int graf[MAX_VERTICES][MAX_VERTICES], int vertex,
+//    int sizeRoute, int size, int* route, int* minSize) {
 //     route[size] = vertex;
-
+//
 //     for (int i = 0; i < MAX_VERTICES; i++) {
 //         bool isContinue = true;
 //         for (int j = 0; j < size; j++) {
@@ -273,24 +275,24 @@ void graphGetRoutesBetweenVertices(int l, int vertexEnd, int currRoute[], int* c
 //                 break;
 //             }
 //         }
-
+//
 //         if (isContinue) {
 //             if (graf[vertex - 1][i]) 
 //                 printAllSimplyChainMaximum(graf, i + 1, sizeRoute, size + 1, route, minSize);
 //         }
 //     }
-
+//
 //     if (size >= *minSize) {
 //         *minSize = size;
 //         for (int k = 0; k < size; k++) 
 //             std::cout << route[k] << " ";
-        
+//
 //         std::cout << std::endl;
 //     }
 // }
 
 void printAllSimplyChainMaximum(int graf[MAX_VERTICES][MAX_VERTICES], int vertex,
-                                int size, int* route, bool* visited, int& maxSize) {
+    int size, int* route, bool* visited, int& maxSize) {
     // Добавляем текущую вершину в маршрут
     route[size] = vertex;
     visited[vertex - 1] = true;
@@ -348,7 +350,7 @@ void task3G1() {
     std::cout << "Граф G1:" << std::endl;
 
     G1.printMatrix();
-    
+
     std::cout << std::endl;
 
     std::vector<std::vector<int>> sequence = { {3, 5, 6, 7, 1, 2},  {3, 6, 7, 1, 2, 6, 5}, {4, 3, 6, 5, 4}, {5, 5, 7, 6, 3, 5}, {5, 3, 6, 7, 1, 6, 5} };
@@ -436,11 +438,11 @@ void task4() {
     G1.printMatrix();
 
     std::cout << std::endl;
-    int len = 5;
+    int len = 10;
     std::cout << "Все маршруты в графе G1 длинной " << len << " : " << std::endl;
 
     for (int i = 1; i <= MAX_VERTICES; ++i) {
-        graphGetRoutes(G1, i, len);  
+        graphGetRoutes(G1, i, len);
     }
 
     std::cout << std::endl;
@@ -464,7 +466,7 @@ void task4() {
     std::cout << "Все маршруты в графе G2 длинной " << len << " : " << std::endl;
 
     for (int i = 1; i <= MAX_VERTICES; ++i) {
-        graphGetRoutes(G2, i, len);  
+        graphGetRoutes(G2, i, len);
     }
 
     std::cout << std::endl;
@@ -491,9 +493,9 @@ void task5() {
         {1, 0, 0, 0, 0, 1, 0}
     };
 
-    int length;
-    std::cout << "Введите длину: ";
-    std::cin >> length;
+    int length = 3;
+    //std::cout << "Введите длину: ";
+    //std::cin >> length;
 
     std::cout << "\nВ графе G1:\n";
     graphGetRoutesAmountWrapper(graf1, MAX_VERTICES, length);
@@ -503,18 +505,18 @@ void task5() {
 }
 
 // Умножение двух матриц размера n x n
-void multiplyMatrices(const std::vector<std::vector<int>>& mat1, const std::vector<std::vector<int>>& mat2, 
-                      std::vector<std::vector<int>>& result, int n) {
+void multiplyMatrices(const std::vector<std::vector<int>>& mat1, const std::vector<std::vector<int>>& mat2,
+    std::vector<std::vector<int>>& result, int n) {
     std::vector<std::vector<int>> temp(n, std::vector<int>(n, 0));
 
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            for (int k = 0; k < n; ++k) 
+            for (int k = 0; k < n; ++k)
                 temp[i][j] += mat1[i][k] * mat2[k][j];
         }
     }
 
-    for (int i = 0; i < n; ++i) 
+    for (int i = 0; i < n; ++i)
         for (int j = 0; j < n; ++j) result[i][j] = temp[i][j];
 }
 
@@ -523,17 +525,17 @@ void powerMatrix(std::vector<std::vector<int>>& matrix, int n, int power) {
     std::vector<std::vector<int>> result(n, std::vector<int>(n, 0));
 
     for (int i = 0; i < n; ++i) result[i][i] = 1;
-    
+
     std::vector<std::vector<int>> base = matrix;
 
     while (power > 0) {
         if (power % 2 == 1) multiplyMatrices(result, base, result, n);
-        
+
         multiplyMatrices(base, base, base, n);
         power /= 2;
     }
 
-    matrix = result; 
+    matrix = result;
 }
 
 void graphGetRoutesAmountMatrix(const std::vector<std::vector<int>>& graf, int graphSize, int routeLength) {
@@ -573,9 +575,9 @@ void task5Alternative() {
         {1, 0, 0, 0, 0, 1, 0}
     };
 
-    int length;
-    std::cout << "Введите длину маршрута: ";
-    std::cin >> length;
+    int length = 3;
+    //std::cout << "Введите длину маршрута: ";
+    //std::cin >> length;
 
     std::cout << "\nВ графе G1:\n";
     graphGetRoutesAmountMatrix(graf1, MAX_VERTICES, length);
@@ -701,19 +703,21 @@ void task7() {
         {1, 0, 0, 0, 0, 1, 0}
     };
 
-    // int start;
-    // printf("Введите начальную вершину: ");
-    // std::cin >> start;
+    //int start;
+    //printf("Введите начальную вершину: ");
+    //std::cin >> start;
 
-    // int route[MAX_VERTICES];
-    // int minSize = 0;
+    //int route[MAX_VERTICES];
+    //int minSize = 0;
 
-    // printf("Для графа G1:\n");
-    // printAllSimplyChainMaximum(grafG1, start, MAX_VERTICES, 0, route, &minSize);
+    //printf("Для графа G1:\n");
+    //printAllSimplyChainMaximum(grafG1, start, MAX_VERTICES, 0, route, &minSize);
 
-    // printf("\nДля графа G2:\n");
-    // minSize = 0; 
-    // printAllSimplyChainMaximum(grafG2, start, MAX_VERTICES, 0, route, &minSize);
+    //printf("\nДля графа G2:\n");
+    //minSize = 0; 
+    //printAllSimplyChainMaximum(grafG2, start, MAX_VERTICES, 0, route, &minSize);
+
+    //std::cout << "===================================" << std::endl;
 
     int startVertex;
     std::cout << "Введите начальную вершину: ";
@@ -726,10 +730,32 @@ void task7() {
     findAllMaxSimpleChains(grafG2, startVertex);
 }
 
+void task5TimeTest() {
+    auto start_time_no_opt = std::chrono::steady_clock::now();
+
+    task5();
+
+    auto end_time_no_opt = std::chrono::steady_clock::now();
+    auto elapsed_ns_no_opt = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time_no_opt - start_time_no_opt);
+
+
+    auto start_time = std::chrono::steady_clock::now();
+
+    task5Alternative();
+
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time);
+
+
+    std::cout << "\n Время нового способо решения задачи: " << elapsed_ns.count() << " ns\n";
+
+    std::cout << "\n Время старого способо решения задачи: " << elapsed_ns_no_opt.count() << " ns\n";
+}
+
 int main() {
     setlocale(LC_ALL, "Russian");
-
-    task4();
+    
+    task7();
 
     return 0;
 }
