@@ -1,129 +1,195 @@
 #include <iostream>
 #include <vector>
-#include <cstdlib>
+#include <random>
+#include <chrono>
+#include <queue>
+#include <iomanip>
 #include <ctime>
-#include <cstdio>
-
 
 class Graph {
-private:
-    std::vector<std::vector<bool>> adjMatrix; // Матрица смежности
-    int verticesAmount; // Количество вершин
-    int edgesAmount;    // Количество рёбер
-
 public:
-    Graph(int n, int m) : verticesAmount(n), edgesAmount(m) {
-        adjMatrix.resize(n, std::vector<bool>(n, false));
-    }
+    Graph(int vertices, int edges);
+    void randGenerate();
+    bool isConnected() const;
+    bool isEulerian() const;
+    bool isHamiltonian() const;
+    void output() const;
 
-    void clear() {
-        for (int i = 0; i < verticesAmount; ++i) {
-            for (int j = 0; j < verticesAmount; ++j) {
-                adjMatrix[i][j] = false;
-            }
-        }
-    }
+private:
+    std::vector<std::vector<bool>> values;
+    int verticesAmountR;
+    int verticesAmountC;
 
-    void generateRandom() {
-        clear();
-        srand(static_cast<unsigned int>(time(nullptr)));
-
-        // Генерация случайных рёбер
-        for (int j = 0; j < edgesAmount; ++j) {
-            int i = rand() % verticesAmount;
-            int k = rand() % verticesAmount;
-            while (i == k || adjMatrix[i][k]) {
-                k = rand() % verticesAmount;
-            }
-            adjMatrix[i][k] = adjMatrix[k][i] = true;  // Неориентированный граф
-        }
-    }
-
-    bool isEulerian() const {
-        for (int i = 0; i < verticesAmount; ++i) {
-            int degree = 0;
-            for (int j = 0; j < verticesAmount; ++j) {
-                if (adjMatrix[i][j]) degree++;
-            }
-            if (degree % 2 != 0) return false;
-        }
-        return true;
-    }
-
-    bool isHamiltonian() {
-        std::vector<bool> visited(verticesAmount, false);
-        return dfs(0, 0, visited);
-    }
-
-    bool dfs(int v, int count, std::vector<bool>& visited) {
-        visited[v] = true;
-        count++;
-        if (count == verticesAmount) return true;
-
-        for (int i = 0; i < verticesAmount; ++i) {
-            if (adjMatrix[v][i] && !visited[i]) {
-                if (dfs(i, count, visited)) return true;
-            }
-        }
-        visited[v] = false;
-        return false;
-    }
+    bool isAdjacent(int a, int b) const;
+    bool findHamiltonianCycle(int i, int n, std::vector<bool>& path, int current_vertex) const;
+    void bfs(int start, std::vector<bool>& visited) const;
 };
 
-// Генерация графов за 10 секунд для разного количества вершин и рёбер
-void tenSecGen(int n, int last) {
-    double time_spent = 0;
-    int count_eil = 0, count_gam = 0, count_un = 0;
-    int m = n;  
+Graph::Graph(int vertices, int edges)
+    : verticesAmountR(vertices), verticesAmountC(edges), values(vertices, std::vector<bool>(edges, false)) {}
 
-    Graph* Graph_ = new Graph(n, m);
+void Graph::randGenerate() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, verticesAmountR - 1);
 
-    printf("____________________________________________________\n");
-    printf("| Кол-во вершин | Количество рёбер | Эйлеровых графов | Гамильтоновых графов | Всех графов |\n");
+    for (int j = 0; j < verticesAmountC; ++j) {
+        int u, v;
+        do {
+            u = dis(gen);
+            v = dis(gen);
+        } while (u == v);
 
-    while (m <= last) {
-        while (time_spent < 10) {
-            clock_t begin = clock();
-            Graph_->generateRandom();
-            clock_t end = clock();
-            time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
+        values[u][j] = true;
+        values[v][j] = true;
+    }
+}
 
-            if (Graph_->isHamiltonian()) {
-                count_gam++;
+bool Graph::isConnected() const {
+    if (verticesAmountR == 0) return true;
+    
+    std::vector<bool> visited(verticesAmountR, false);
+    bfs(0, visited);
+
+    for (bool v : visited) 
+        if (!v) return false;
+    
+    return true;
+}
+
+void Graph::bfs(int start, std::vector<bool>& visited) const {
+    std::queue<int> q;
+    q.push(start);
+    visited[start] = true;
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+        for (int j = 0; j < verticesAmountC; ++j) {
+            if (values[u][j]) {
+                for (int v = 0; v < verticesAmountR; ++v) {
+                    if (v != u && values[v][j] && !visited[v]) {
+                        visited[v] = true;
+                        q.push(v);
+                    }
+                }
             }
-
-            if (Graph_->isEulerian()) {
-                count_eil++;
-            }
-            count_un++;
         }
+    }
+}
 
-        printf("| %13d | %16d | %18d | %20d | %11d |\n", n, m, count_eil, count_gam, count_un);
+bool Graph::isEulerian() const {
+    if (!isConnected()) return false;
+    
+    for (int i = 0; i < verticesAmountR; ++i) {
+        int degree = 0;
 
-        m++;
-        delete Graph_;
-        Graph_ = new Graph(n, m);
-        time_spent = 0;
-        count_eil = 0;
-        count_gam = 0;
-        count_un = 0;
+        for (int j = 0; j < verticesAmountC; ++j) 
+            if (values[i][j]) ++degree;
+        
+        if (degree % 2 != 0) return false;
+        
     }
 
-    delete Graph_;
+    return true;
+}
+
+bool Graph::isAdjacent(int a, int b) const {
+    for (int j = 0; j < verticesAmountC; ++j) 
+        if (values[a][j] && values[b][j]) return true;
+    
+    return false;
+}
+
+bool Graph::findHamiltonianCycle(int i, int n, std::vector<bool>& path, int current_vertex) const {
+    if (i == n) {
+        if (isAdjacent(current_vertex, path[0])) return true;
+
+        else return false; 
+    }
+
+    for (int next_vertex = 0; next_vertex < n; ++next_vertex) {
+        if (!path[next_vertex] && isAdjacent(current_vertex, next_vertex)) {
+            path[next_vertex] = true;
+
+            if (findHamiltonianCycle(i + 1, n, path, next_vertex)) 
+                return true;
+            
+            path[next_vertex] = false;
+        }
+    }
+
+    return false;
+}
+
+bool Graph::isHamiltonian() const {
+    if (!isConnected()) return false;
+    
+    std::vector<bool> path(verticesAmountR, false);
+    path[0] = true;
+
+    if (!findHamiltonianCycle(1, verticesAmountR, path, 0)) return false;
+
+    else return true;
+    
+}
+
+void Graph::output() const {
+    for (int i = 0; i < verticesAmountR; ++i) {
+        for (int j = 0; j < verticesAmountC; ++j) 
+            std::cout << values[i][j] << " ";
+        
+        std::cout << std::endl;
+    }
+}
+
+void printHeader() {
+    std::cout << "____________________________________________________________________________________________________\n";
+    std::cout << "| " << std::setw(13) << "Кол-во вершин"
+              << " | " << std::setw(16) << "Количество ребер"
+              << " | " << std::setw(22) << "Кол-во Эйлеровых графов"
+              << " | " << std::setw(20) << "Гамильтоновых графов"
+              << " | " << std::setw(11) << "Всех графов"
+              << " |\n";
+    std::cout << "____________________________________________________________________________________________________\n";
+}
+
+void tenSecGen(int n, int last) {
+    for (int m = n; m <= last; ++m) {
+        int count_eil = 0, count_gam = 0, count_un = 0;
+        auto start = std::chrono::high_resolution_clock::now();
+        while (true) {
+            Graph graph(n, m);
+            graph.randGenerate();
+            ++count_un;
+            if (graph.isHamiltonian()) {
+                ++count_gam;
+            }
+            if (graph.isEulerian()) {
+                ++count_eil;
+            }
+            auto end = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = end - start;
+            if (elapsed.count() >= 10.0) {
+                break;
+            }
+        }
+        std::cout << "| " << std::setw(13) << n
+                  << " | " << std::setw(16) << m
+                  << " | " << std::setw(22) << count_eil
+                  << " | " << std::setw(20) << count_gam
+                  << " | " << std::setw(11) << count_un << " |\n";
+    }
 }
 
 int main() {
-    setlocale(LC_ALL, "Russian");
-
-    // Таблица для разных количеств вершин
-    printf("\n\nТаблица для 8 вершин: \n");
-    tenSecGen(8, 20);
-
-    printf("\n\nТаблица для 9 вершин: \n");
-    tenSecGen(9, 21);
-
-    printf("\n\nТаблица для 10 вершин: \n");
-    tenSecGen(10, 22);
-
+    std::cout << "\n\nТаблица для 8 вершин: \n";
+    printHeader();
+    tenSecGen(8, 28);
+    std::cout << "\n\nТаблица для 9 вершин: \n";
+    printHeader();
+    tenSecGen(9, 36);
+    std::cout << "\n\nТаблица для 10 вершин: \n";
+    printHeader();
+    tenSecGen(10, 45);
     return 0;
 }
