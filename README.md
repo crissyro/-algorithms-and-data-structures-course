@@ -2,6 +2,8 @@
 # Algorithms and Data Structures Course
 
 ## Overview
+![]([https://github.com/crissyro/crissyro/blob/main/__.gif](https://github.com/crissyro/-algorithms-and-data-structures-course/blob/main/misc/images/tears_asd.gif))
+
 This repository hosts materials for a course on algorithms and data structures, including tasks, solutions, and code examples. It is designed to support learners in understanding fundamental algorithms and various data structures through hands-on exercises and examples.
 
 ## Table of Contents
